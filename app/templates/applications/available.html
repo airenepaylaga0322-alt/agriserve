@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block title %}Available Assistance · AgriServe{%
+endblock %} {% block content %}
+<h2 class="mb-4" style="color: #174d35">Available Assistance Programs</h2>
+<div class="row g-4">
+  {% for p in programs %}
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <span class="badge bg-secondary mb-2">{{ p.category }}</span>
+        <h5 class="card-title">{{ p.name }}</h5>
+        <p class="card-text text-muted small">{{ p.description }}</p>
+        <p class="mb-3 fw-bold">
+          Max Benefit: ₱{{ p.max_benefit_per_farmer or 'N/A' }}
+        </p>
+        <a
+          href="{{ url_for('applications.apply', program_id=p.id) }}"
+          class="btn btn-success w-100"
+          >Apply Now</a
+        >
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="col-12 text-center text-muted py-5">
+    No active programs available at this time.
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %} {% block title %}My Profile · AgriServe{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h3 class="mb-4" style="color: #174d35">Update Profile</h3>
+        <form method="POST">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              {{ form.barangay.label(class="form-label") }}{{
+              form.barangay(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ form.municipality.label(class="form-label") }}{{
+              form.municipality(class="form-control") }}
+            </div>
+          </div>
+          <div class="mb-3">
+            {{ form.province.label(class="form-label") }}{{
+            form.province(class="form-control") }}
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-4">
+              {{ form.household_size.label(class="form-label") }}{{
+              form.household_size(class="form-control") }}
+            </div>
+            <div class="col-md-4">
+              {{ form.dependents.label(class="form-label") }}{{
+              form.dependents(class="form-control") }}
+            </div>
+            <div class="col-md-4">
+              {{ form.contact_number.label(class="form-label") }}{{
+              form.contact_number(class="form-control") }}
+            </div>
+          </div>
+          <div class="row mb-4">
+            <div class="col-md-6">
+              {{ form.primary_income_source.label(class="form-label") }}{{
+              form.primary_income_source(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              {{ form.estimated_monthly_income.label(class="form-label") }}{{
+              form.estimated_monthly_income(class="form-control") }}
+            </div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <a
+              href="{{ url_for('farmer.dashboard') }}"
+              class="btn btn-outline-secondary"
+              >Cancel</a
+            >
+            {{ form.submit(class="btn btn-success") }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

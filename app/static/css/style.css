@@ -1,0 +1,33 @@
+:root {
+  --forest: #174d35;
+  --deep: #103b2a;
+  --leaf: #55a96b;
+  --mint: #e8f4ea;
+  --offwhite: #f7f8f3;
+  --charcoal: #24332b;
+}
+
+body {
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  background-color: var(--offwhite);
+  color: var(--charcoal);
+}
+
+.btn-success {
+  background-color: var(--forest);
+  border-color: var(--forest);
+}
+.btn-success:hover {
+  background-color: var(--deep);
+  border-color: var(--deep);
+}
+
+.card {
+  border-radius: 12px;
+}

@@ -1,0 +1,14 @@
+{% extends "base.html" %} {% block title %}Access Denied · AgriServe{% endblock
+%} {% block content %}
+<div class="text-center py-5">
+  <h1 class="display-1 text-danger"><i class="bi bi-shield-lock"></i></h1>
+  <h2 class="mb-3">Access Denied (403)</h2>
+  <p class="lead text-muted">
+    You do not have permission to view this page. If you believe this is a
+    mistake, please contact the administrator.
+  </p>
+  <a href="{{ url_for('public.home') }}" class="btn btn-success mt-3"
+    >Return to Home</a
+  >
+</div>
+{% endblock %}

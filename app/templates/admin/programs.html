@@ -1,0 +1,64 @@
+{% extends "base.html" %} {% block title %}Manage Programs · Admin{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-bold">Create New Program</div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="mb-2">
+            {{ form.code.label(class="form-label small") }}{{
+            form.code(class="form-control form-control-sm") }}
+          </div>
+          <div class="mb-2">
+            {{ form.name.label(class="form-label small") }}{{
+            form.name(class="form-control form-control-sm") }}
+          </div>
+          <div class="mb-2">
+            {{ form.category.label(class="form-label small") }}{{
+            form.category(class="form-select form-select-sm") }}
+          </div>
+          <div class="mb-2">
+            {{ form.available_allocation.label(class="form-label small") }}{{
+            form.available_allocation(class="form-control form-control-sm") }}
+          </div>
+          <div class="mb-2">
+            {{ form.max_benefit_per_farmer.label(class="form-label small") }}{{
+            form.max_benefit_per_farmer(class="form-control form-control-sm") }}
+          </div>
+          <div class="mb-3">
+            {{ form.description.label(class="form-label small") }}{{
+            form.description(class="form-control form-control-sm", rows="3") }}
+          </div>
+          {{ form.submit(class="btn btn-success w-100 btn-sm") }}
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <h3 class="mb-3" style="color: #174d35">Active Programs</h3>
+    <div class="card border-0 shadow-sm">
+      <ul class="list-group list-group-flush">
+        {% for p in programs %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1 fw-bold">{{ p.name }} ({{ p.code }})</h6>
+              <small class="text-muted"
+                >{{ p.category }} | Allocation: ₱{{ p.available_allocation or
+                'N/A' }}</small
+              >
+            </div>
+            <span class="badge bg-success">Active</span>
+          </div>
+        </li>
+        {% else %}
+        <li class="list-group-item text-center text-muted py-3">
+          No programs created yet.
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

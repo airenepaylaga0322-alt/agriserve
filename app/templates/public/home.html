@@ -1,0 +1,20 @@
+{% extends "base.html" %} {% block title %}AgriServe · Home{% endblock %} {%
+block content %}
+<div class="text-center py-5">
+  <h1 class="display-5 fw-bold" style="color: #174d35">
+    Better Farmer Records. Fairer Agricultural Assistance.
+  </h1>
+  <p class="lead text-muted mt-3">
+    A local records and assistance-tracking platform for barangay and municipal
+    agriculture offices.
+  </p>
+  <a href="{{ url_for('auth.register') }}" class="btn btn-success btn-lg mt-3"
+    >Get started</a
+  >
+  <a
+    href="{{ url_for('auth.login') }}"
+    class="btn btn-outline-success btn-lg mt-3"
+    >Log in</a
+  >
+</div>
+{% endblock %}

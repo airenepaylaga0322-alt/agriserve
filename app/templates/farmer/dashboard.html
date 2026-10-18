@@ -1,0 +1,89 @@
+{% extends "base.html" %} {% block title %}Farmer Dashboard · AgriServe{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 style="color: #174d35">Welcome, {{ current_user.full_name }}</h2>
+  <span class="badge bg-secondary"
+    >Status: {{ profile.verification_status | replace('_', ' ') | title }}</span
+  >
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title">My Profile</h5>
+        <p class="text-muted small mb-2">
+          Barangay: {{ profile.barangay or 'Not set' }} | Municipality: {{
+          profile.municipality or 'Not set' }}
+        </p>
+        <a
+          href="{{ url_for('farmer.profile') }}"
+          class="btn btn-outline-success btn-sm"
+          >Edit Profile</a
+        >
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="card-title mb-0">My Farms</h5>
+          <span class="fs-3 fw-bold">{{ profile.farms | length }}</span>
+        </div>
+        <a href="{{ url_for('farmer.add_farm') }}" class="btn btn-success"
+          >+ Add Farm</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white fw-bold">Registered Farms</div>
+  <ul class="list-group list-group-flush">
+    {% for farm in profile.farms %}
+    <li
+      class="list-group-item d-flex justify-content-between align-items-center"
+    >
+      <div>
+        <!-- THIS IS THE CLICKABLE LINK -->
+        <a
+          href="{{ url_for('farmer.view_farm', farm_id=farm.id) }}"
+          class="fw-bold text-success text-decoration-none fs-5"
+        >
+          {{ farm.farm_code }}
+        </a>
+        - {{ farm.location or 'No description' }}<br />
+        <small class="text-muted"
+          >{{ farm.area }} hectares | {{ farm.land_tenure | title }}</small
+        >
+      </div>
+      <span class="badge bg-light text-dark"
+        >Crops: {{ farm.crops | length }}</span
+      >
+    </li>
+    {% else %}
+    <li class="list-group-item text-center text-muted py-4">
+      No farms registered yet. Click "+ Add Farm" to start.
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+<!-- Quick Actions -->
+<div class="mt-4">
+  <h5 class="text-muted mb-3">Quick Actions</h5>
+  <div class="d-flex gap-3">
+    <a
+      href="{{ url_for('applications.available_programs') }}"
+      class="btn btn-success"
+      >Apply for Assistance</a
+    >
+    <a
+      href="{{ url_for('applications.my_applications') }}"
+      class="btn btn-outline-success"
+      >Track My Applications</a
+    >
+  </div>
+</div>
+{% endblock %}

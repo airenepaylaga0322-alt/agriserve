@@ -1,0 +1,127 @@
+{% extends "base.html" %} {% block title %}Review Applications · Admin{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 style="color: #174d35">Review Applications</h2>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Ref Code</th>
+          <th>Farmer</th>
+          <th>Program</th>
+          <th>Farm</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app in applications %}
+        <tr>
+          <td class="fw-bold">{{ app.reference_code }}</td>
+          <td>
+            {{ app.farmer_user.full_name }}<br />
+            <small class="text-muted">{{ app.farmer_user.email }}</small>
+          </td>
+          <td>{{ app.program.name }}</td>
+          <td>{{ app.farm.farm_code if app.farm else 'N/A' }}</td>
+          <td>
+            <span class="badge bg-{{ app.status_badge }}"
+              >{{ app.status_label }}</span
+            >
+          </td>
+          <td>
+            {% if app.status == 'submitted' or app.status == 'pending_review' %}
+            <!-- Button to trigger modal -->
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#decideModal{{ app.id }}"
+            >
+              Review
+            </button>
+
+            <!-- Review Modal -->
+            <div class="modal fade" id="decideModal{{ app.id }}" tabindex="-1">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <form
+                    method="POST"
+                    action="{{ url_for('admin.decide_application', app_id=app.id) }}"
+                  >
+                    <div class="modal-header">
+                      <h5 class="modal-title">Review Application</h5>
+                      <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                      ></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>
+                        <strong>Farmer:</strong> {{ app.farmer_user.full_name }}
+                      </p>
+                      <p><strong>Program:</strong> {{ app.program.name }}</p>
+                      <p>
+                        <strong>Notes from Farmer:</strong> "{{ app.notes or
+                        'None' }}"
+                      </p>
+                      <hr />
+                      <div class="mb-3">
+                        <label class="form-label fw-bold"
+                          >Reason for Decision (Required)</label
+                        >
+                        <textarea
+                          name="reason"
+                          class="form-control"
+                          rows="3"
+                          required
+                          placeholder="e.g., Verified farm documents and eligibility."
+                        ></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button
+                        type="submit"
+                        name="decision"
+                        value="rejected"
+                        class="btn btn-outline-danger"
+                      >
+                        Reject
+                      </button>
+                      <button
+                        type="submit"
+                        name="decision"
+                        value="approved"
+                        class="btn btn-success"
+                      >
+                        Approve
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            {% else %}
+            <small class="text-muted"
+              >Reviewed on {{ app.decided_at.strftime('%Y-%m-%d') if
+              app.decided_at else '' }}</small
+            >
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">
+            No applications submitted yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

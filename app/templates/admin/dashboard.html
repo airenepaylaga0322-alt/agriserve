@@ -1,0 +1,111 @@
+{% extends "base.html" %} {% block title %}Admin Dashboard · AgriServe{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 style="color: #174d35">Admin Dashboard</h2>
+  <a href="{{ url_for('admin.export_excel') }}" class="btn btn-success">
+    <i class="bi bi-file-earmark-excel me-1"></i> Export to Excel
+  </a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Registered Farmers</div>
+        <div class="fs-3 fw-bold">{{ total_farmers }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Total Applications</div>
+        <div class="fs-3 fw-bold">{{ total_applications }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Pending Review</div>
+        <div class="fs-3 fw-bold text-warning">{{ pending_count }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Approved</div>
+        <div class="fs-3 fw-bold text-success">{{ approved_count }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white fw-bold">Application Status Chart</div>
+      <div class="card-body">
+        <!-- Chart.js Canvas -->
+        <canvas id="appChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white fw-bold">Recent Accounts</div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in recent_users %}
+            <tr>
+              <td>{{ u.full_name }}</td>
+              <td><span class="badge bg-secondary">{{ u.role }}</span></td>
+              <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="3" class="text-center text-muted py-3">
+                No accounts yet.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('appChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Pending', 'Approved'],
+      datasets: [{
+        data: [{{ pending_count }}, {{ approved_count }}],
+        backgroundColor: ['#ffc107', '#198754'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+</script>
+{% endblock %}

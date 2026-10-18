@@ -1,0 +1,45 @@
+{% extends "base.html" %} {% block title %}My Applications · AgriServe{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 style="color: #174d35">My Applications</h2>
+  <a
+    href="{{ url_for('applications.available_programs') }}"
+    class="btn btn-success"
+    >+ Apply for Assistance</a
+  >
+</div>
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Ref Code</th>
+          <th>Program</th>
+          <th>Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app in applications %}
+        <tr>
+          <td class="fw-bold">{{ app.reference_code }}</td>
+          <td>{{ app.program.name }}</td>
+          <td>{{ app.submitted_at.strftime('%Y-%m-%d') }}</td>
+          <td>
+            <span class="badge bg-{{ app.status_badge }}"
+              >{{ app.status_label }}</span
+            >
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="text-center text-muted py-4">
+            You have not submitted any applications yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

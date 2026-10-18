@@ -1,0 +1,33 @@
+{% extends "base.html" %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h3 class="mb-1" style="color: #174d35">
+          Apply for: {{ program.name }}
+        </h3>
+        <p class="text-muted small mb-4">{{ program.description }}</p>
+        <form method="POST">
+          <div class="mb-3">
+            {{ form.farm_id.label(class="form-label") }}{{
+            form.farm_id(class="form-select") }}
+          </div>
+          <div class="mb-4">
+            {{ form.notes.label(class="form-label") }}{{
+            form.notes(class="form-control", rows="3", placeholder="Explain why
+            you need this assistance...") }}
+          </div>
+          <div class="d-flex justify-content-between">
+            <a
+              href="{{ url_for('applications.available_programs') }}"
+              class="btn btn-outline-secondary"
+              >Cancel</a
+            >
+            {{ form.submit(class="btn btn-success") }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %} {% block title %}{{ farm.farm_code }} · AgriServe{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 style="color: #174d35">{{ farm.farm_code }}</h2>
+    <p class="text-muted mb-0">
+      {{ farm.location or 'No description' }} | {{ farm.area }} hectares
+    </p>
+  </div>
+  <a
+    href="{{ url_for('farmer.dashboard') }}"
+    class="btn btn-outline-secondary btn-sm"
+    >Back to Dashboard</a
+  >
+</div>
+
+<div class="row g-4">
+  <!-- Crops Section -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div
+        class="card-header bg-white d-flex justify-content-between align-items-center"
+      >
+        <strong>Crops Planted</strong>
+        <a
+          href="{{ url_for('farmer.add_crop', farm_id=farm.id) }}"
+          class="btn btn-sm btn-success"
+          >+ Add Crop</a
+        >
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for crop in farm.crops %}
+        <li class="list-group-item">
+          <strong>{{ crop.crop_type }}</strong><br />
+          <small class="text-muted"
+            >Planted: {{ crop.planting_date.strftime('%Y-%m-%d') }} | Est.
+            Production: {{ crop.estimated_production }} kg</small
+          >
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted text-center py-3">
+          No crops recorded yet.
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Losses Section -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div
+        class="card-header bg-white d-flex justify-content-between align-items-center"
+      >
+        <strong>Recorded Losses</strong>
+        <a
+          href="{{ url_for('farmer.add_loss', farm_id=farm.id) }}"
+          class="btn btn-sm btn-danger"
+          >+ Record Loss</a
+        >
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for loss in farm.losses %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <strong>{{ loss.loss_type }}</strong>
+            <span
+              class="badge {% if loss.is_verified %}bg-success{% else %}bg-warning text-dark{% endif %}"
+            >
+              {{ 'Verified' if loss.is_verified else 'Pending Verification' }}
+            </span>
+          </div>
+          <small class="text-muted"
+            >{{ loss.loss_date.strftime('%Y-%m-%d') }} | {{ loss.loss_percentage
+            }}% lost</small
+          >
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted text-center py-3">
+          No losses recorded.
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
