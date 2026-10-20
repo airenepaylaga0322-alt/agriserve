@@ -14,8 +14,17 @@ class Config:
         "DATABASE_URL",
         "mysql+pymysql://root:12345678@127.0.0.1:3306/agriserve?charset=utf8mb4",
     )
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "pool_recycle": 280}
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 280,
+        "connect_args": {
+            "ssl": {
+                "ca": os.path.join(BASE_DIR, "ca.pem")
+            }
+        },
+    }
 
     UPLOAD_FOLDER = os.getenv(
         "UPLOAD_FOLDER", os.path.join(INSTANCE_DIR, "uploads")
