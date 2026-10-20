@@ -1,3 +1,4 @@
+import time
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from ..extensions import db
@@ -36,8 +37,11 @@ def apply(program_id):
     form.farm_id.choices = [(f.id, f"{f.farm_code} ({f.area} ha)") for f in current_user.profile.farms]
 
     if form.validate_on_submit():
+        # This generates a unique reference code so it doesn't crash
+        unique_ref = f"APP-{program.code}-{current_user.id:04d}-{int(time.time())}"
+
         app = AssistanceApplication(
-            reference_code=f"APP-{program.code}-{current_user.id:04d}",
+            reference_code=unique_ref,
             farmer_user_id=current_user.id,
             program_id=program.id,
             farm_id=form.farm_id.data,
@@ -50,3 +54,13 @@ def apply(program_id):
         return redirect(url_for("applications.my_applications"))
 
     return render_template("applications/apply.html", form=form, program=program)
+
+@bp.route("/<int:app_id>/assessment")
+@login_required
+@role_required(Role.FARMER)
+def assessment_result(app_id):
+    app_record = AssistanceApplication.query.get_or_404(app_id)
+    if app_record.farmer_user_id != current_user.id:
+        flash("Unauthorized access.", "danger")
+        return redirect(url_for("applications.my_applications"))
+    return render_template("applications/assessment_result.html", app=app_record)

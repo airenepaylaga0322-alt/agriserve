@@ -17,6 +17,7 @@ endblock %} {% block content %}
           <th>Program</th>
           <th>Date</th>
           <th>Status</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
@@ -30,10 +31,25 @@ endblock %} {% block content %}
               >{{ app.status_label }}</span
             >
           </td>
+          <td>
+            {% if app.status == 'approved' %}
+            <a
+              href="{{ url_for('admin.generate_certificate', app_id=app.id) }}"
+              class="btn btn-sm btn-danger mb-1"
+              ><i class="bi bi-file-pdf"></i> PDF</a
+            >
+            {% endif %} {% if app.rubric_assessment %}
+            <a
+              href="{{ url_for('applications.assessment_result', app_id=app.id) }}"
+              class="btn btn-sm btn-outline-primary"
+              >View Score</a
+            >
+            {% endif %}
+          </td>
         </tr>
         {% else %}
         <tr>
-          <td colspan="4" class="text-center text-muted py-4">
+          <td colspan="5" class="text-center text-muted py-4">
             You have not submitted any applications yet.
           </td>
         </tr>

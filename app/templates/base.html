@@ -34,7 +34,6 @@
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="nav">
           <ul class="navbar-nav ms-auto align-items-lg-center">
             {% if current_user.is_authenticated %} {% if current_user.is_admin
@@ -58,6 +57,20 @@
                 class="nav-link text-white"
                 href="{{ url_for('admin.review_applications') }}"
                 >Review Applications</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link text-white"
+                href="{{ url_for('admin.qr_code') }}"
+                >QR Code</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link text-white"
+                href="{{ url_for('admin.audit_logs') }}"
+                >Audit Logs</a
               >
             </li>
             {% elif current_user.is_farmer %}

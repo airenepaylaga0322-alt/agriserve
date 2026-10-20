@@ -1,7 +1,19 @@
-{% extends "base.html" %} {% block title %}Review Applications · Admin{%
-endblock %} {% block content %}
+{% extends "base.html" %}
+{% block title %}Review Applications · Admin{% endblock %}
+{% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h2 style="color: #174d35">Review Applications</h2>
+  <h2 style="color:#174D35;">Review Applications</h2>
+  <form class="d-flex gap-2" method="GET">
+    <input type="text" name="search" class="form-control form-control-sm" placeholder="Search Name or Ref..." value="{{ search_query }}">
+    <select name="status" class="form-select form-select-sm">
+      <option value="">All Statuses</option>
+      <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>Submitted</option>
+      <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+      <option value="requires_additional_info" {% if status_filter == 'requires_additional_info' %}selected{% endif %}>Requires Info</option>
+    </select>
+    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+    <a href="{{ url_for('admin.review_applications') }}" class="btn btn-sm btn-outline-secondary">Clear</a>
+  </form>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -22,103 +34,86 @@ endblock %} {% block content %}
         <tr>
           <td class="fw-bold">{{ app.reference_code }}</td>
           <td>
-            {{ app.farmer_user.full_name }}<br />
+            {{ app.farmer_user.full_name }}<br>
             <small class="text-muted">{{ app.farmer_user.email }}</small>
           </td>
           <td>{{ app.program.name }}</td>
-          <td>{{ app.farm.farm_code if app.farm else 'N/A' }}</td>
           <td>
-            <span class="badge bg-{{ app.status_badge }}"
-              >{{ app.status_label }}</span
-            >
+            {{ app.farm.farm_code if app.farm else 'N/A' }}
+            {% if app.rubric_assessment %}
+              <br><span class="badge bg-info text-dark">Score: {{ app.rubric_assessment.total_score }}</span>
+            {% endif %}
           </td>
+          <td><span class="badge bg-{{ app.status_badge }}">{{ app.status_label }}</span></td>
           <td>
             {% if app.status == 'submitted' or app.status == 'pending_review' %}
-            <!-- Button to trigger modal -->
-            <button
-              type="button"
-              class="btn btn-sm btn-primary"
-              data-bs-toggle="modal"
-              data-bs-target="#decideModal{{ app.id }}"
-            >
-              Review
-            </button>
+              <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#decideModal{{ app.id }}">
+                Review
+              </button>
 
-            <!-- Review Modal -->
-            <div class="modal fade" id="decideModal{{ app.id }}" tabindex="-1">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <form
-                    method="POST"
-                    action="{{ url_for('admin.decide_application', app_id=app.id) }}"
-                  >
-                    <div class="modal-header">
-                      <h5 class="modal-title">Review Application</h5>
-                      <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                      ></button>
-                    </div>
-                    <div class="modal-body">
-                      <p>
-                        <strong>Farmer:</strong> {{ app.farmer_user.full_name }}
-                      </p>
-                      <p><strong>Program:</strong> {{ app.program.name }}</p>
-                      <p>
-                        <strong>Notes from Farmer:</strong> "{{ app.notes or
-                        'None' }}"
-                      </p>
-                      <hr />
-                      <div class="mb-3">
-                        <label class="form-label fw-bold"
-                          >Reason for Decision (Required)</label
-                        >
-                        <textarea
-                          name="reason"
-                          class="form-control"
-                          rows="3"
-                          required
-                          placeholder="e.g., Verified farm documents and eligibility."
-                        ></textarea>
+              <!-- Review Modal -->
+              <div class="modal fade" id="decideModal{{ app.id }}" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+                    
+                    <form method="POST" action="{{ url_for('admin.decide_application', app_id=app.id) }}">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Review Application: {{ app.reference_code }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
-                    </div>
-                    <div class="modal-footer">
-                      <button
-                        type="submit"
-                        name="decision"
-                        value="rejected"
-                        class="btn btn-outline-danger"
-                      >
-                        Reject
-                      </button>
-                      <button
-                        type="submit"
-                        name="decision"
-                        value="approved"
-                        class="btn btn-success"
-                      >
-                        Approve
-                      </button>
-                    </div>
-                  </form>
+                      <div class="modal-body">
+                        <p><strong>Farmer:</strong> {{ app.farmer_user.full_name }} | <strong>Program:</strong> {{ app.program.name }}</p>
+                        <p><strong>Notes:</strong> "{{ app.notes or 'None' }}"</p>
+                        
+                        <div class="bg-light p-3 rounded mb-3 border">
+                            <h6 class="fw-bold text-success mb-3"><i class="bi bi-calculator"></i> Automated Rubric Assessment</h6>
+                            
+                            {% if app.rubric_assessment %}
+                                <div class="alert alert-{{ 'success' if app.rubric_assessment.recommendation == 'APPROVED' else 'danger' }} py-2">
+                                    <strong>Total Score: {{ app.rubric_assessment.total_score }} / 100</strong><br>
+                                    System Recommendation: <strong>{{ app.rubric_assessment.recommendation }}</strong>
+                                    <hr class="my-2">
+                                    <small>
+                                        A (Vulnerability): {{ app.rubric_assessment.score_a }} | 
+                                        B (Loss): {{ app.rubric_assessment.score_b }} | 
+                                        C (Dependence): {{ app.rubric_assessment.score_c }} | 
+                                        D (No Prior Aid): {{ app.rubric_assessment.score_d }}
+                                    </small>
+                                </div>
+                                
+                                {% if app.rubric_assessment.recommendation == 'REJECTED' %}
+                                <div class="alert alert-warning py-2 mb-0 small">
+                                    <i class="bi bi-exclamation-triangle"></i> <strong>Override Warning:</strong> If you choose to Approve despite the system's rejection, you must write a detailed justification below (min 20 chars).
+                                </div>
+                                {% endif %}
+                            {% else %}
+                                <p class="small text-muted mb-2">Enter verified data. The system will calculate eligibility to prevent bias.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <hr>
+                        <div class="mb-3">
+                          <label class="form-label fw-bold">Reason for Final Decision (Required)</label>
+                          <textarea name="reason" class="form-control" rows="3" required placeholder="e.g., Verified farm documents and eligibility."></textarea>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="submit" name="decision" value="requires_info" class="btn btn-warning">Request Info</button>
+                        <button type="submit" name="decision" value="rejected" class="btn btn-outline-danger">Reject</button>
+                        <button type="submit" name="decision" value="approved" class="btn btn-success">Approve</button>
+                      </div>
+                    </form>
+                    
+                  </div>
                 </div>
               </div>
-            </div>
             {% else %}
-            <small class="text-muted"
-              >Reviewed on {{ app.decided_at.strftime('%Y-%m-%d') if
-              app.decided_at else '' }}</small
-            >
+              <small class="text-muted">Reviewed on {{ app.decided_at.strftime('%Y-%m-%d') if app.decided_at else '' }}</small>
             {% endif %}
           </td>
         </tr>
         {% else %}
-        <tr>
-          <td colspan="6" class="text-center text-muted py-4">
-            No applications submitted yet.
-          </td>
-        </tr>
+        <tr><td colspan="6" class="text-center text-muted py-4">No applications found.</td></tr>
         {% endfor %}
       </tbody>
     </table>

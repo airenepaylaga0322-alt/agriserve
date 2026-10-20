@@ -1,0 +1,106 @@
+{% extends "base.html" %} {% block title %}Assessment Result · AgriServe{%
+endblock %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 style="color: #174d35">Assessment Breakdown</h2>
+      <a
+        href="{{ url_for('applications.my_applications') }}"
+        class="btn btn-outline-secondary btn-sm"
+        >Back</a
+      >
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h5 class="card-title">
+          {{ app.program.name }} ({{ app.reference_code }})
+        </h5>
+        <p class="text-muted mb-0">
+          Submitted: {{ app.submitted_at.strftime('%Y-%m-%d') }} | Status:
+          <span class="badge bg-{{ app.status_badge }}"
+            >{{ app.status_label }}</span
+          >
+        </p>
+      </div>
+    </div>
+
+    {% if app.rubric_assessment %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-bold">
+        How Your Score Was Calculated
+      </div>
+      <div class="card-body">
+        <div
+          class="alert alert-{{ 'success' if app.rubric_assessment.recommendation == 'APPROVED' else 'danger' }}"
+        >
+          <h4 class="alert-heading">
+            Total Score: {{ app.rubric_assessment.total_score }} / 100
+          </h4>
+          <p class="mb-0">
+            System Recommendation:
+            <strong>{{ app.rubric_assessment.recommendation }}</strong>
+          </p>
+        </div>
+
+        <table class="table table-sm mt-4">
+          <thead>
+            <tr>
+              <th>Criterion</th>
+              <th>Weight</th>
+              <th>Your Score (0-100)</th>
+              <th>Weighted Contribution</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>A. Household Economic Vulnerability</td>
+              <td>40%</td>
+              <td>{{ app.rubric_assessment.score_a }}</td>
+              <td>
+                {{ (app.rubric_assessment.score_a * 0.40) | round(2) }} pts
+              </td>
+            </tr>
+            <tr>
+              <td>B. Severity of Agricultural Loss</td>
+              <td>30%</td>
+              <td>{{ app.rubric_assessment.score_b }}</td>
+              <td>
+                {{ (app.rubric_assessment.score_b * 0.30) | round(2) }} pts
+              </td>
+            </tr>
+            <tr>
+              <td>C. Dependence on Farming</td>
+              <td>20%</td>
+              <td>{{ app.rubric_assessment.score_c }}</td>
+              <td>
+                {{ (app.rubric_assessment.score_c * 0.20) | round(2) }} pts
+              </td>
+            </tr>
+            <tr>
+              <td>D. Previous Assistance Adjustment</td>
+              <td>10%</td>
+              <td>{{ app.rubric_assessment.score_d }}</td>
+              <td>
+                {{ (app.rubric_assessment.score_d * 0.10) | round(2) }} pts
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="small text-muted mt-3">
+          <i class="bi bi-info-circle"></i> The final approval decision is still
+          subject to document verification by the Agricultural Officer. A high
+          score does not automatically guarantee assistance.
+        </p>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+      The Agricultural Officer has not yet completed the preliminary assessment
+      for this application.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

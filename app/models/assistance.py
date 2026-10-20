@@ -32,6 +32,7 @@ class AssistanceProgram(db.Model):
     description = db.Column(db.Text)
     category = db.Column(db.String(30), nullable=False)
     available_allocation = db.Column(db.Numeric(14, 2))
+    required_documents = db.Column(db.Text)
     max_benefit_per_farmer = db.Column(db.Numeric(14, 2))
     status = db.Column(db.String(20), default="active", index=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
@@ -50,7 +51,6 @@ class AssistanceApplication(db.Model):
     notes = db.Column(db.Text)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     
-    # Decision fields
     decided_at = db.Column(db.DateTime)
     decided_by_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     decision_reason = db.Column(db.Text)
@@ -66,3 +66,32 @@ class AssistanceApplication(db.Model):
     @property
     def status_badge(self):
         return ApplicationStatus.BADGE.get(self.status, "secondary")
+
+
+class RubricAssessment(db.Model):
+    __tablename__ = "rubric_assessments"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    application_id = db.Column(db.Integer, db.ForeignKey("assistance_applications.id"), unique=True, nullable=False)
+    
+    score_a = db.Column(db.Numeric(5, 2))
+    score_b = db.Column(db.Numeric(5, 2))
+    score_c = db.Column(db.Numeric(5, 2))
+    score_d = db.Column(db.Numeric(5, 2))
+    total_score = db.Column(db.Numeric(5, 2))
+    recommendation = db.Column(db.String(50))
+
+    application = db.relationship("AssistanceApplication", backref=db.backref("rubric_assessment", uselist=False))
+
+
+class AuditLog(db.Model):
+    __tablename__ = "audit_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    actor_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    action = db.Column(db.String(255), nullable=False)
+    target_id = db.Column(db.Integer)
+    details = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    actor = db.relationship("User")

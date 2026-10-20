@@ -3,11 +3,14 @@ from flask import Flask, render_template, request
 from .extensions import db, login_manager
 from .models.user import User
 from config import Config
+from flask_mail import Mail
 
 
 def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config_class)
+    mail = Mail()
+    mail.init_app(app)
 
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     os.makedirs(app.instance_path, exist_ok=True)
