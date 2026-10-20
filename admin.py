@@ -1,3 +1,7 @@
+import io
+import qrcode
+from flask import send_file
+
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
 from flask_login import login_required, current_user
@@ -45,6 +49,28 @@ def dashboard():
 def audit_logs():
     logs = AuditLog.query.order_by(AuditLog.created_at.desc()).all()
     return render_template("admin/audit_logs.html", logs=logs)
+
+@bp.route("/programs", methods=["GET", "POST"])
+@login_required
+@role_required(Role.ADMIN)
+def programs():
+    form = ProgramForm()
+    if form.validate_on_submit():
+        prog = AssistanceProgram(
+            code=form.code.data,
+            name=form.name.data,
+            category=form.category.data,
+            description=form.description.data,
+            available_allocation=form.available_allocation.data,
+            max_benefit_per_farmer=form.max_benefit_per_farmer.data,
+        )
+        db.session.add(prog)
+        db.session.commit()
+        flash("Program created successfully!", "success")
+        return redirect(url_for("admin.programs"))
+        
+    all_programs = AssistanceProgram.query.order_by(AssistanceProgram.created_at.desc()).all()
+    return render_template("admin/programs.html", form=form, programs=all_programs)
 
 @bp.route("/applications")
 @login_required
@@ -175,3 +201,73 @@ def generate_certificate(app_id):
     buffer.seek(0)
     
     return send_file(buffer, mimetype='application/pdf', as_attachment=True, download_name=f"Certificate_{app_record.reference_code}.pdf")
+
+@bp.route("/export/excel")
+@login_required
+@role_required(Role.ADMIN)
+def export_excel():
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Farmer Applications"
+
+    headers = ["Farmer Name", "Email", "Barangay", "Municipality", "Program Applied", "Farm Code", "Status", "Date Submitted", "Admin Decision Reason"]
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="174D35", end_color="174D35", fill_type="solid")
+    
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num)
+        cell.value = header
+        cell.font = header_font
+        cell.fill = header_fill
+
+    apps = AssistanceApplication.query.order_by(AssistanceApplication.submitted_at.desc()).all()
+
+    for row_num, app in enumerate(apps, 2):
+        farmer = app.farmer_user
+        profile = farmer.profile
+        
+        ws.cell(row=row_num, column=1, value=farmer.full_name)
+        ws.cell(row=row_num, column=2, value=farmer.email)
+        ws.cell(row=row_num, column=3, value=profile.barangay if profile else "N/A")
+        ws.cell(row=row_num, column=4, value=profile.municipality if profile else "N/A")
+        ws.cell(row=row_num, column=5, value=app.program.name)
+        ws.cell(row=row_num, column=6, value=app.farm.farm_code if app.farm else "N/A")
+        ws.cell(row=row_num, column=7, value=app.status.upper())
+        ws.cell(row=row_num, column=8, value=app.submitted_at.strftime('%Y-%m-%d') if app.submitted_at else "")
+        ws.cell(row=row_num, column=9, value=app.decision_reason or "")
+
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column].width = adjusted_width
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return send_file(output, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="AgriServe_Farmer_Data.xlsx")
+
+@bp.route("/qr-code")
+@login_required
+@role_required(Role.ADMIN)
+def qr_code():
+    return render_template("admin/qr_code.html")
+
+@bp.route("/qr-image")
+@login_required
+@role_required(Role.ADMIN)
+def qr_image():
+    # Automatically gets the live URL (works on Render, not just localhost)
+    url = request.url_root
+    qr = qrcode.make(url)
+    buffer = io.BytesIO()
+    qr.save(buffer, format="PNG")
+    buffer.seek(0)
+    return send_file(buffer, mimetype="image/png")
